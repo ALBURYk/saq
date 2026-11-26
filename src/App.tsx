@@ -82,7 +82,7 @@ export default function App() {
             Saq помогает распознать обман, но не заменяет банк и полицию: при сомнениях звоните по номеру на обороте карты или 102.
           </p>
           <p>
-            <a className="underline hover:text-white/70" href="https://github.com/" id="gh-link" target="_blank" rel="noreferrer">
+            <a className="underline hover:text-white/70" href="https://github.com/ALBURYk/saq" target="_blank" rel="noreferrer">
               Открытый код
             </a>{' '}
             · Anthropic Claude · Vercel · three.js
