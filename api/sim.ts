@@ -14,7 +14,32 @@ const SCHEMES: Record<string, string> = {
 
 type Msg = { role: 'assistant' | 'user'; content: string }
 
-// Google Gemini (generateContent). Модель из env GEMINI_MODEL, иначе пробуем по списку (404 → следующая).
+// Схема ответа: Gemini обязан вернуть валидный JSON этой формы.
+const SIM_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    done: { type: 'BOOLEAN' },
+    reply: { type: 'STRING' },
+    score: { type: 'INTEGER' },
+    caught: { type: 'ARRAY', items: { type: 'STRING' } },
+    missed: { type: 'ARRAY', items: { type: 'STRING' } },
+    tip: { type: 'STRING' },
+  },
+  required: ['done'],
+}
+
+// Если JSON всё же битый — достаём поле reply регуляркой.
+function pickReply(s: string): string | null {
+  const m = s.match(/"reply"\s*:\s*"((?:[^"\\]|\\.)*)"/)
+  if (!m) return null
+  try {
+    return JSON.parse(`"${m[1]}"`)
+  } catch {
+    return m[1]
+  }
+}
+
+// Google Gemini (generateContent). Модель из env GEMINI_MODEL, иначе пробуем по списку (404/429/5xx → следующая).
 async function gemini(key: string, system: string, contents: unknown[], temperature: number): Promise<string> {
   const models = [process.env.GEMINI_MODEL, 'gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'].filter(Boolean) as string[]
   let last = 'no model'
@@ -25,7 +50,7 @@ async function gemini(key: string, system: string, contents: unknown[], temperat
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: system }] },
         contents,
-        generationConfig: { responseMimeType: 'application/json', temperature, maxOutputTokens: 4096 },
+        generationConfig: { responseMimeType: 'application/json', responseSchema: SIM_SCHEMA, temperature, maxOutputTokens: 4096 },
       }),
     })
     if (r.status === 404 || r.status === 429 || r.status >= 500) {
@@ -99,7 +124,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     let out = ''
     if (gKey) {
-      const contents = merged.map((m) => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }))
+      // Свои прошлые реплики модель видит в том же JSON-формате, что и должна отвечать.
+      const contents = merged.map((m) =>
+        m.role === 'assistant'
+          ? { role: 'model', parts: [{ text: JSON.stringify({ done: false, reply: m.content }) }] }
+          : { role: 'user', parts: [{ text: m.content }] },
+      )
       out = await gemini(gKey, system, contents, 0.9)
     } else {
       const r = await fetch('https://api.anthropic.com/v1/messages', {
@@ -123,7 +153,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       })
     }
     if (j && typeof j.reply === 'string' && !mustFinish) return res.status(200).json({ done: false, reply: j.reply.slice(0, 600) })
-    if (!j && out && !mustFinish) return res.status(200).json({ done: false, reply: out.slice(0, 600) })
+    const picked = pickReply(out)
+    if (picked && !mustFinish) return res.status(200).json({ done: false, reply: picked.slice(0, 600) })
+    if (!j && out && !out.trim().startsWith('{') && !mustFinish) return res.status(200).json({ done: false, reply: out.slice(0, 600) })
     throw new Error('bad json')
   } catch (e) {
     console.warn('sim error:', (e as Error).message)
