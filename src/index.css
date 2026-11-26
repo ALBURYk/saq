@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Unbounded", "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: dark;
+  --bg: #05070d;
+}
+html, body, #root { min-height: 100%; }
+body {
+  margin: 0;
+  background: radial-gradient(1200px 700px at 70% -10%, #0e3b3f 0%, transparent 60%),
+    radial-gradient(900px 600px at -10% 110%, #1b1440 0%, transparent 55%), var(--bg);
+  color: #eaf2f5;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: #2dd4bf55; }
+
+.glass {
+  position: relative;
+  border-radius: 28px;
+  background: linear-gradient(160deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), inset 0 -1px 0 rgba(255,255,255,0.04),
+    0 20px 60px -20px rgba(0,0,0,0.6);
+}
+.glass::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(180deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0) 28%);
+  mask: linear-gradient(#000, transparent 40%);
+}
+.glass-refract { backdrop-filter: url(#saq-refract) blur(24px) saturate(180%); }
+
+mark.flag {
+  background: rgba(248, 113, 113, 0.22);
+  color: #ffd7d7;
+  border-bottom: 2px solid #f87171;
+  border-radius: 6px;
+  padding: 1px 3px;
+  cursor: help;
+}
+mark.flag.active { background: rgba(248, 113, 113, 0.45); }
