@@ -100,6 +100,31 @@ function validate(x: unknown): Result | null {
   return { risk, verdict, scheme: o.scheme.slice(0, 120), flags, actions, simple: o.simple.slice(0, 400) }
 }
 
+// Google Gemini (generateContent). Модель из env GEMINI_MODEL, иначе пробуем по списку (404 → следующая).
+async function gemini(key: string, system: string, contents: unknown[], temperature: number): Promise<string> {
+  const models = [process.env.GEMINI_MODEL, 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'].filter(Boolean) as string[]
+  let last = 'no model'
+  for (const m of models) {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`, {
+      method: 'POST',
+      headers: { 'x-goog-api-key': key, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: system }] },
+        contents,
+        generationConfig: { responseMimeType: 'application/json', temperature, maxOutputTokens: 4096 },
+      }),
+    })
+    if (r.status === 404) {
+      last = `gemini ${m} 404`
+      continue
+    }
+    if (!r.ok) throw new Error(`gemini ${m} ${r.status}`)
+    const d = (await r.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] }
+    return d.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? ''
+  }
+  throw new Error(last)
+}
+
 function extractJson(s: string): unknown {
   const a = s.indexOf('{')
   const b = s.lastIndexOf('}')
@@ -125,22 +150,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (Math.floor((imageBase64.length * 3) / 4) > MAX_IMAGE_BYTES) return res.status(400).json({ error: 'Картинка больше 4 МБ' })
   }
 
-  const key = process.env.ANTHROPIC_API_KEY
-  if (!key) return res.status(200).json(fallbackCheck(text))
-
-  const content: unknown[] = []
-  if (imageBase64) content.push({ type: 'image', source: { type: 'base64', media_type: mime, data: imageBase64 } })
-  content.push({ type: 'text', text: text ? `Сообщение для проверки:\n"""${text}"""` : 'Проверь переписку на скриншоте.' })
+  const gKey = process.env.GEMINI_API_KEY
+  const aKey = process.env.ANTHROPIC_API_KEY
+  if (!gKey && !aKey) return res.status(200).json(fallbackCheck(text))
+  const prompt = text ? `Сообщение для проверки:\n"""${text}"""` : 'Проверь переписку на скриншоте.'
 
   try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-      body: JSON.stringify({ model: MODEL, max_tokens: 1200, system: SYSTEM, messages: [{ role: 'user', content }] }),
-    })
-    if (!r.ok) throw new Error(`anthropic ${r.status}`)
-    const data = (await r.json()) as { content?: { type: string; text?: string }[] }
-    const out = data.content?.find((c) => c.type === 'text')?.text ?? ''
+    let out = ''
+    if (gKey) {
+      const parts: unknown[] = []
+      if (imageBase64) parts.push({ inlineData: { mimeType: mime, data: imageBase64 } })
+      parts.push({ text: prompt })
+      out = await gemini(gKey, SYSTEM, [{ role: 'user', parts }], 0.2)
+    } else {
+      const content: unknown[] = []
+      if (imageBase64) content.push({ type: 'image', source: { type: 'base64', media_type: mime, data: imageBase64 } })
+      content.push({ type: 'text', text: prompt })
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'x-api-key': aKey!, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+        body: JSON.stringify({ model: MODEL, max_tokens: 1200, system: SYSTEM, messages: [{ role: 'user', content }] }),
+      })
+      if (!r.ok) throw new Error(`anthropic ${r.status}`)
+      const data = (await r.json()) as { content?: { type: string; text?: string }[] }
+      out = data.content?.find((c) => c.type === 'text')?.text ?? ''
+    }
     const parsed = validate(extractJson(out))
     if (!parsed) throw new Error('bad json')
     return res.status(200).json(parsed)

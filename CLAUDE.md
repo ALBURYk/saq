@@ -31,7 +31,7 @@
 ## Стек
 - Vite + React + TypeScript, Tailwind v4 (`@tailwindcss/vite`), `motion`.
 - 3D: `three` + `@react-three/fiber` + `@react-three/drei` — сфера-индикатор риска (MeshDistortMaterial, цвет зелёный→жёлтый→красный, сильнее искажается при высоком риске).
-- `api/check.ts`, `api/sim.ts` — Vercel functions → Anthropic API `claude-haiku-5-5` (текст + vision). Ключ только в env `ANTHROPIC_API_KEY`.
+- `api/check.ts`, `api/sim.ts` — Vercel functions → Google Gemini Flash (текст + vision). Ключ только в env `GEMINI_API_KEY` (модель — `GEMINI_MODEL`). Запасной провайдер: `ANTHROPIC_API_KEY`.
 - Озвучка в приложении: Web Speech API (`speechSynthesis`, ru-RU) — бесплатно, без ключа.
 - «Отправить внуку»: `https://wa.me/?text=` — без бэкенда.
 - Без БД. История проверок — localStorage.

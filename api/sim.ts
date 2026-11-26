@@ -14,6 +14,31 @@ const SCHEMES: Record<string, string> = {
 
 type Msg = { role: 'assistant' | 'user'; content: string }
 
+// Google Gemini (generateContent). Модель из env GEMINI_MODEL, иначе пробуем по списку (404 → следующая).
+async function gemini(key: string, system: string, contents: unknown[], temperature: number): Promise<string> {
+  const models = [process.env.GEMINI_MODEL, 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'].filter(Boolean) as string[]
+  let last = 'no model'
+  for (const m of models) {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`, {
+      method: 'POST',
+      headers: { 'x-goog-api-key': key, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: system }] },
+        contents,
+        generationConfig: { responseMimeType: 'application/json', temperature, maxOutputTokens: 4096 },
+      }),
+    })
+    if (r.status === 404) {
+      last = `gemini ${m} 404`
+      continue
+    }
+    if (!r.ok) throw new Error(`gemini ${m} ${r.status}`)
+    const d = (await r.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] }
+    return d.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? ''
+  }
+  throw new Error(last)
+}
+
 function extractJson(s: string): any {
   const a = s.indexOf('{')
   const b = s.lastIndexOf('}')
@@ -39,8 +64,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const finish = body.finish === true
   const turns = messages.filter((m) => m.role === 'assistant').length
 
-  const key = process.env.ANTHROPIC_API_KEY
-  if (!key) return res.status(503).json({ error: 'no key', fallback: true })
+  const gKey = process.env.GEMINI_API_KEY
+  const aKey = process.env.ANTHROPIC_API_KEY
+  if (!gKey && !aKey) return res.status(503).json({ error: 'no key', fallback: true })
 
   const mustFinish = finish || turns >= MAX_TURNS
   const system = `Ты — учебный тренажёр Saq «Прививка». Ты играешь мошенника по схеме: ${SCHEMES[scheme]}.
@@ -59,10 +85,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (mustFinish) {
     apiMessages.push({
       role: 'user',
-      content: (messages.at(-1)?.role === 'user' ? '' : '') + '[Тренировка окончена. Верни только JSON-разбор с done:true.]',
+      content: '[Тренировка окончена. Верни только JSON-разбор с done:true.]',
     })
   }
-  // Anthropic требует чередование ролей — склеиваем подряд идущие user-сообщения.
+  // Модели требуют чередование ролей — склеиваем подряд идущие user-сообщения.
   const merged: { role: string; content: string }[] = []
   for (const m of apiMessages) {
     const last = merged.at(-1)
@@ -71,14 +97,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-      body: JSON.stringify({ model: MODEL, max_tokens: 700, system, messages: merged }),
-    })
-    if (!r.ok) throw new Error(`anthropic ${r.status}`)
-    const data = (await r.json()) as { content?: { type: string; text?: string }[] }
-    const out = data.content?.find((c) => c.type === 'text')?.text ?? ''
+    let out = ''
+    if (gKey) {
+      const contents = merged.map((m) => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }))
+      out = await gemini(gKey, system, contents, 0.9)
+    } else {
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'x-api-key': aKey!, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+        body: JSON.stringify({ model: MODEL, max_tokens: 700, system, messages: merged }),
+      })
+      if (!r.ok) throw new Error(`anthropic ${r.status}`)
+      const data = (await r.json()) as { content?: { type: string; text?: string }[] }
+      out = data.content?.find((c) => c.type === 'text')?.text ?? ''
+    }
     const j = extractJson(out)
     if (j && j.done === true) {
       const list = (x: unknown) => (Array.isArray(x) ? x.filter((s) => typeof s === 'string').slice(0, 6) : [])

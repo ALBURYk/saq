@@ -138,7 +138,7 @@ export default function App() {
             <a className="underline hover:text-white/70" href="https://github.com/ALBURYk/saq" target="_blank" rel="noreferrer">
               Открытый код
             </a>{' '}
-            · Anthropic Claude · Vercel · three.js
+            · Google Gemini · Vercel · three.js
           </p>
         </footer>
       </main>
