@@ -46,3 +46,29 @@ mark.flag {
   cursor: help;
 }
 mark.flag.active { background: rgba(248, 113, 113, 0.45); }
+mark.flag:focus-visible { outline: 2px solid #f87171; outline-offset: 2px; }
+
+/* Доступность: видимый фокус с клавиатуры */
+:where(button, a, input, textarea, [role="button"]):focus-visible {
+  outline: 2px solid #5eead4;
+  outline-offset: 2px;
+}
+textarea:focus-visible, input:focus-visible { outline: none; }
+
+/* «печатает…» в чате */
+@keyframes typing { 0%, 60%, 100% { transform: translateY(0); opacity: .45 } 30% { transform: translateY(-4px); opacity: 1 } }
+.typing-dot { animation: typing 1.1s infinite ease-in-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+/* Печать памятки: только содержимое, чёрным по белому */
+@media print {
+  .no-print, canvas { display: none !important; }
+  body { background: #fff !important; color: #000 !important; }
+  #memo * { color: #000 !important; background: transparent !important; box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+  #memo .glass { border: 1px solid #999 !important; border-radius: 14px; }
+  #memo .glass::before { display: none; }
+  #memo li, #memo .memo-card { break-inside: avoid; }
+}
