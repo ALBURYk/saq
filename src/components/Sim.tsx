@@ -17,7 +17,7 @@ function offlineEnd(id: SimScheme['id'], msgs: SimMsg[], caught: boolean): SimEn
       done: true,
       score: Math.max(40, 100 - (shown - 1) * 12),
       caught: seen,
-      missed: script.slice(shown).map((s) => s.flag).slice(0, 2),
+      missed: [],
       tip: 'Отлично! Правило одно: положите трубку и перезвоните сами по официальному номеру.',
     }
   }

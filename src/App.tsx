@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'motion/react'
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import Glass, { GlassFilter } from './components/Glass'
 import Checker from './components/Checker'
 import Sim from './components/Sim'
@@ -11,10 +11,34 @@ type Tab = 'check' | 'sim'
 export default function App() {
   const [tab, setTab] = useState<Tab>('check')
   const [risk, setRisk] = useState<number | null>(null)
+  const [big, setBig] = useState(() => {
+    try {
+      return localStorage.getItem('saq-big') === '1'
+    } catch {
+      return false
+    }
+  })
+  useEffect(() => {
+    document.documentElement.style.fontSize = big ? '19px' : ''
+    try {
+      localStorage.setItem('saq-big', big ? '1' : '0')
+    } catch {
+      /* storage may be blocked */
+    }
+  }, [big])
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
       <GlassFilter />
+      <button
+        onClick={() => setBig(!big)}
+        aria-pressed={big}
+        className={`fixed right-3 top-3 z-50 rounded-full border px-3 py-1.5 text-sm font-semibold backdrop-blur-md transition ${
+          big ? 'border-teal-300/60 bg-teal-300 text-[#04211f]' : 'border-white/15 bg-black/40 text-white/80 hover:bg-white/10'
+        }`}
+      >
+        Aa {big ? 'Обычный шрифт' : 'Крупный шрифт'}
+      </button>
 
       <header className="relative mx-auto grid max-w-6xl items-center gap-2 px-4 pt-8 sm:px-6 md:grid-cols-[1.15fr_1fr] md:pt-14">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="relative z-10">
@@ -72,6 +96,35 @@ export default function App() {
             {tab === 'check' ? <Checker onRisk={setRisk} /> : <Sim />}
           </motion.div>
         </AnimatePresence>
+
+        <section className="mt-16">
+          <h2 className="mb-5 text-center font-display text-2xl font-semibold sm:text-3xl">Как это работает</h2>
+          <div className="grid gap-4 sm:grid-cols-3">
+            {[
+              ['1', 'Покажите', 'Вставьте сообщение, загрузите скриншот или расскажите про звонок голосом.'],
+              ['2', 'Saq объясняет', 'ИИ находит приёмы давления — срочность, «код из СМС», секретность — и подсвечивает их прямо в тексте.'],
+              ['3', 'Вы защищены', 'Три понятных шага, озвучка для пожилых и кнопка «Отправить внуку». А «Прививка» тренирует заранее.'],
+            ].map(([n, t, d], i) => (
+              <motion.div key={n} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
+                <Glass className="h-full p-5">
+                  <div className="grid h-9 w-9 place-items-center rounded-full bg-teal-300 font-display font-bold text-[#04211f]">{n}</div>
+                  <div className="mt-3 font-display text-lg font-semibold">{t}</div>
+                  <p className="mt-1 text-sm leading-relaxed text-white/65">{d}</p>
+                </Glass>
+              </motion.div>
+            ))}
+          </div>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <Glass className="p-5">
+              <div className="font-semibold text-teal-200">Для людей — бесплатно</div>
+              <p className="mt-1 text-sm text-white/60">Пожилые, подростки, продавцы на маркетплейсах — все, кому звонят «из банка».</p>
+            </Glass>
+            <Glass className="p-5">
+              <div className="font-semibold text-teal-200">Для банков и операторов</div>
+              <p className="mt-1 text-sm text-white/60">White-label и API: предотвратить обман дешевле, чем разбирать последствия.</p>
+            </Glass>
+          </div>
+        </section>
 
         <footer className="mt-14 grid gap-2 text-center text-xs leading-relaxed text-white/40">
           <p>

@@ -24,6 +24,33 @@ export default function Checker({ onRisk }: { onRisk: (r: number | null) => void
   const [hist, setHist] = useState<Hist[]>(loadHist)
   const fileRef = useRef<HTMLInputElement>(null)
   const resultRef = useRef<HTMLDivElement>(null)
+  const [listening, setListening] = useState(false)
+  const recRef = useRef<any>(null)
+  const SR = typeof window !== 'undefined' ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition : null
+
+  // Голосовой ввод: «опишите звонок своими словами» — удобно пожилым.
+  const toggleMic = () => {
+    if (!SR) return
+    if (listening) {
+      recRef.current?.stop()
+      return
+    }
+    const rec = new SR()
+    rec.lang = 'ru-RU'
+    rec.interimResults = false
+    rec.continuous = true
+    const base = text ? text.trimEnd() + ' ' : ''
+    let said = ''
+    rec.onresult = (e: any) => {
+      said = Array.from(e.results as ArrayLike<any>).map((r) => r[0].transcript).join(' ')
+      setText((base + said).slice(0, 4000))
+    }
+    rec.onerror = () => setListening(false)
+    rec.onend = () => setListening(false)
+    recRef.current = rec
+    rec.start()
+    setListening(true)
+  }
 
   const run = async (t = text, image = img) => {
     if (!t.trim() && !image) return setError('Вставьте текст сообщения или загрузите скриншот')
@@ -73,6 +100,9 @@ export default function Checker({ onRisk }: { onRisk: (r: number | null) => void
             const f = Array.from(e.clipboardData.files).find((x) => x.type.startsWith('image/'))
             if (f) onFile(f)
           }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) run()
+          }}
           placeholder="Вставьте сообщение, скриншот (Ctrl+V) или опишите звонок своими словами…"
           rows={5}
           className="w-full resize-y rounded-2xl border border-white/10 bg-black/30 p-4 text-lg leading-relaxed text-white placeholder:text-white/35 focus:border-teal-300/60 focus:outline-none"
@@ -103,6 +133,16 @@ export default function Checker({ onRisk }: { onRisk: (r: number | null) => void
           >
             📷 Скриншот
           </button>
+          {SR && (
+            <button
+              onClick={toggleMic}
+              className={`rounded-2xl border px-5 py-4 font-semibold transition ${
+                listening ? 'animate-pulse border-red-400/60 bg-red-500/20 text-red-100' : 'border-white/15 bg-white/5 text-white/85 hover:bg-white/10'
+              }`}
+            >
+              {listening ? '⏺ Слушаю… стоп' : '🎤 Рассказать голосом'}
+            </button>
+          )}
           <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => onFile(e.target.files?.[0])} />
         </div>
         {error && <div className="mt-3 rounded-xl bg-red-500/15 px-4 py-2 text-sm text-red-200">{error}</div>}
