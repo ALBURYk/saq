@@ -1,0 +1,4 @@
+Saq — ИИ-щит от мошенников (Venture Startup Battle 2026)
+
+MVP (работает без входа): https://saq-alburyks-projects.vercel.app
+GitHub (открытый код):    https://github.com/ALBURYk/saq

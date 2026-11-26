@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Saq — pitch deck</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  @page { size: 1920px 1080px; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #05070d; }
+  body { font-family: Inter, system-ui, sans-serif; color: #eaf2f5; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .s { width: 1920px; height: 1080px; position: relative; overflow: hidden; padding: 110px 140px; page-break-after: always; break-after: page;
+       background: radial-gradient(1100px 700px at 85% -10%, #0e3b3f 0%, transparent 60%), radial-gradient(900px 600px at -10% 110%, #1b1440 0%, transparent 55%), #05070d; }
+  .n { position: absolute; right: 140px; bottom: 70px; color: #ffffff40; font-size: 22px; }
+  .brand { position: absolute; left: 140px; bottom: 70px; color: #5eead4; font: 700 22px Unbounded, sans-serif; }
+  h1 { font: 700 150px/1 Unbounded, sans-serif; margin: 0; letter-spacing: -2px; }
+  h2 { font: 700 72px/1.1 Unbounded, sans-serif; margin: 0 0 50px; }
+  .lead { font-size: 40px; line-height: 1.35; color: #ffffffcc; max-width: 1400px; }
+  .dim { color: #ffffff88; }
+  .t { color: #5eead4; }
+  .r { color: #f87171; }
+  .grid { display: grid; gap: 32px; }
+  .g2 { grid-template-columns: 1fr 1fr; } .g3 { grid-template-columns: 1fr 1fr 1fr; }
+  .card { border-radius: 32px; padding: 40px 44px; background: linear-gradient(160deg, #ffffff1a, #ffffff08); border: 1px solid #ffffff22; box-shadow: inset 0 1px 0 #ffffff40; }
+  .card h3 { font: 700 34px Unbounded, sans-serif; margin: 0 0 16px; }
+  .card p, .card li { font-size: 28px; line-height: 1.45; color: #ffffffbb; margin: 0; }
+  .big { font: 700 76px/1.05 Unbounded, sans-serif; white-space: nowrap; }
+  .lbl { font-size: 26px; color: #ffffffaa; margin-top: 14px; line-height: 1.35; }
+  .src { position: absolute; left: 140px; bottom: 120px; right: 140px; font-size: 18px; color: #ffffff66; line-height: 1.5; }
+  ul { margin: 0; padding-left: 30px; } li { margin-bottom: 12px; }
+  .shot { width: 100%; border-radius: 24px; border: 1px solid #ffffff22; display: block; }
+  .pill { display: inline-block; border: 1px solid #5eead455; background: #5eead41a; color: #99f6e4; border-radius: 999px; padding: 10px 26px; font-size: 26px; }
+  .tag { display: inline-block; background: #facc1526; color: #fde68a; border-radius: 12px; padding: 4px 14px; font-size: 22px; font-weight: 600; margin-left: 10px; vertical-align: middle; }
+  .orb { position: absolute; right: -120px; top: 120px; width: 760px; height: 760px; border-radius: 50%;
+         background: radial-gradient(circle at 35% 30%, #99f6e4, #14b8a6 45%, #134e4a 80%); filter: blur(2px); opacity: .9; box-shadow: 0 0 200px #2dd4bf55; }
+  .arch { font: 500 27px/1.7 Consolas, monospace; white-space: pre; color: #cbd5e1; }
+  @media screen { .s { margin: 0 auto 20px; } }
+  body.one .s { display: none; } body.one .s.on { display: block; }
+</style>
+</head>
+<body>
+
+<section class="s">
+  <div class="orb"></div>
+  <div class="pill">🛡 ИИ-щит от мошенников · Казахстан</div>
+  <h1 style="margin-top:60px">Saq<span class="t">.</span></h1>
+  <p class="lead" style="font:500 64px/1.15 Unbounded,sans-serif;color:#fff;margin-top:40px;max-width:1000px">Проверь, прежде чем перевести.</p>
+  <p class="lead dim" style="max-width:950px">Банки ловят перевод. Saq ловит момент, когда человека ещё уговаривают.</p>
+  <p class="lead dim" style="font-size:28px">«Сақ» по-казахски — бдительный · финтех + соцзащита</p>
+  <div class="n">1</div>
+</section>
+
+<section class="s">
+  <h2>Проблема</h2>
+  <div class="grid g3">
+    <div class="card"><div class="big r">28 851</div><div class="lbl">случай интернет-мошенничества в РК за 2025 г. — 23,3% всех преступлений</div></div>
+    <div class="card"><div class="big r">12,2 млрд ₸</div><div class="lbl">ущерб за 2025 г.; вернули около 5 млрд ₸</div></div>
+    <div class="card"><div class="big r">~2,8 млн ₸</div><div class="lbl">средний ущерб от ложных звонков — схема №1, 10 000+ пострадавших</div></div>
+  </div>
+  <p class="lead" style="margin-top:60px">Жертву «обрабатывают» по телефону и в мессенджерах. Когда деньги ушли — вернуть их почти невозможно.</p>
+  <div class="src">Источники: nur.kz/nurfin/personal/2415987 (28 851 случай, 23,3%); bes.media — Генпрокуратура РК: ущерб 2025 г. 12,2 млрд ₸, возвращено 5 млрд ₸; bizmedia.kz, 14.11.2025 — Антифрод-центр НБ РК: ложные звонки, 10 000+ пострадавших, средний ущерб ~2,8 млн ₸.</div>
+  <div class="n">2</div>
+</section>
+
+<section class="s">
+  <h2>Почему не решено</h2>
+  <div class="grid g2">
+    <div class="card"><h3>Антифрод банков</h3><p>Ловит подозрительную <b>транзакцию</b>. Но человек уже убеждён — он сам подтверждает перевод и сам диктует код.</p></div>
+    <div class="card"><h3>Лекции по финграмотности</h3><p>Скучные, разовые и <b>не тренируют реакцию</b>. В момент звонка паника сильнее знаний.</p></div>
+  </div>
+  <p class="lead" style="margin-top:60px">Нужен инструмент <span class="t">до</span> перевода: объяснить обман простыми словами и натренировать реакцию заранее.</p>
+  <div class="n">3</div>
+</section>
+
+<section class="s">
+  <h2>Решение</h2>
+  <div class="grid g2">
+    <div class="card"><h3>🔍 Проверка</h3><ul><li>Текст, скриншот или рассказ голосом</li><li>Риск 0–100 и название схемы</li><li><b>Подсветка фраз-манипуляций</b> с объяснением</li><li>3 шага «что делать сейчас»</li><li>«Прочитать вслух» и «Отправить внуку»</li></ul></div>
+    <div class="card"><h3>💉 Прививка</h3><ul><li>ИИ безопасно играет мошенника в чате</li><li>Схемы: звонок «банка», OLX, «мама, я в беде»</li><li>Кнопка «Это мошенник!» в любой момент</li><li><b>Разбор:</b> что заметил, что пропустил, балл</li><li>Без реальных номеров и ссылок</li></ul></div>
+  </div>
+  <div class="n">4</div>
+</section>
+
+<section class="s">
+  <h2>Демо <span class="dim" style="font-size:36px">· saq-alburyks-projects.vercel.app</span></h2>
+  <div class="grid g2" style="align-items:start">
+    <img class="shot" style="height:740px;object-fit:cover;object-position:top" src="../screenshots/2-verdict-red.jpg">
+    <div class="grid" style="gap:24px"><img class="shot" style="height:300px;object-fit:cover;object-position:top" src="../screenshots/6-sim-chat-ai.jpg"><img class="shot" style="height:416px;object-fit:cover;object-position:50% 20%" src="../screenshots/5-sim-debrief-ai.jpg"></div>
+  </div>
+  <div class="n">5</div>
+</section>
+
+<section class="s">
+  <h2>Уникальность</h2>
+  <div class="grid g2">
+    <div class="card"><h3>Объясняет, а не блокирует</h3><p>Показывает прямо в тексте, <b>какой приём</b> на вас действует: срочность, «код из СМС», секретность.</p></div>
+    <div class="card"><h3>Тренирует до атаки</h3><p>«Прививка» — диалог с ИИ-мошенником и разбор ошибок. Тренировка вместо лекции.</p></div>
+    <div class="card"><h3>Сделано для пожилых</h3><p>Озвучка вердикта, голосовой ввод, крупный шрифт, кнопка «Отправить внуку» в WhatsApp.</p></div>
+    <div class="card"><h3>Локальные схемы РК</h3><p>Звонки «службы безопасности», фейк-покупатели OLX, лжеинвестиции, «мама, я в беде».</p></div>
+  </div>
+  <div class="n">6</div>
+</section>
+
+<section class="s">
+  <h2>Технологии и безопасность</h2>
+  <div class="grid g2">
+    <div class="card"><div class="arch">React + TS (Vite)
+  │  скрин сжат canvas → EXIF удалён
+  ▼
+Vercel Functions  api/check · api/sim
+  │  лимиты, валидация JSON
+  ▼
+Google Gemini (текст + vision)
+  └ фолбэк: правила, демо не ломается</div></div>
+    <div class="card"><h3>Безопасность</h3><ul><li>Ключ ИИ только на сервере</li><li>Текст ≤ 4000 симв., картинка ≤ 4 МБ</li><li>Ничего не храним, БД нет</li><li>Тренажёр без реальных реквизитов</li></ul>
+      <h3 style="margin-top:30px">Своё / стороннее</h3><p>Своё: продукт, промпты, логика вердикта и подсветки, тренажёр, UI. Стороннее: Gemini API, Vercel, React, three.js, Web Speech API.</p></div>
+  </div>
+  <div class="n">7</div>
+</section>
+
+<section class="s">
+  <h2>Бизнес-модель</h2>
+  <div class="grid g3">
+    <div class="card"><h3>Людям — бесплатно</h3><p>Веб, далее Telegram/WhatsApp-бот. Пожилые, подростки, продавцы на маркетплейсах.</p></div>
+    <div class="card"><h3>B2B2C</h3><p>Банки и операторы: white-label и API. Предотвратить дешевле, чем разбирать последствия.</p></div>
+    <div class="card"><h3>B2G / образование</h3><p>«Прививка» для школ, ЦОНов, центров для пожилых.</p></div>
+  </div>
+  <div class="card" style="margin-top:32px"><h3>Юнит-экономика <span class="tag">гипотеза</span></h3><p>Одна проверка ИИ стоит доли тенге (тарифы Flash-моделей), а средний ущерб от ложного звонка — ~2,8 млн ₸. Даже одна предотвращённая кража окупает огромное число проверок. Цифры требуют проверки на пилоте.</p></div>
+  <div class="n">8</div>
+</section>
+
+<section class="s">
+  <h2>ESG</h2>
+  <div class="grid g3">
+    <div class="card"><h3 class="t">S — социальное</h3><p>Защита самых уязвимых: пожилых и подростков. Финансовая грамотность через практику, а не лекции.</p></div>
+    <div class="card"><h3 class="t">G — управление</h3><p>Приватность по умолчанию: ничего не храним, метаданные удаляются, ключи на сервере. Открытый код.</p></div>
+    <div class="card"><h3 class="t">E — среда</h3><p>Без своих серверов и БД: serverless, лёгкая модель, запросы только по действию пользователя.</p></div>
+  </div>
+  <div class="n">9</div>
+</section>
+
+<section class="s">
+  <h2>Дальше</h2>
+  <div class="grid g2">
+    <div class="card"><h3>Roadmap</h3><ul><li>Telegram / WhatsApp-бот: «перешли подозрительное сообщение»</li><li>Казахский язык</li><li>Проверка голоса звонка</li><li>Пилот с одним банком</li></ul></div>
+    <div class="card"><h3>Ссылки</h3><p style="font-size:30px;line-height:1.8">MVP: <span class="t">saq-alburyks-projects.vercel.app</span><br>GitHub: <span class="t">github.com/ALBURYk/saq</span></p><p style="margin-top:24px">Команда: <i>вписать названия ролей/имена</i></p></div>
+  </div>
+  <div class="n">10</div>
+</section>
+
+<script>
+  const q = new URLSearchParams(location.search).get('s')
+  if (q) { document.body.classList.add('one'); document.querySelectorAll('.s')[+q - 1]?.classList.add('on') }
+</script>
+</body>
+</html>

@@ -23,3 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 .claude/
+submission/video/
+submission/frames/
+submission/*.webm
+submission/recorder.html
