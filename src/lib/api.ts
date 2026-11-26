@@ -4,6 +4,7 @@ export type { CheckResult }
 export async function checkMessage(input: { text?: string; imageBase64?: string; mime?: string }): Promise<CheckResult> {
   try {
     const r = await fetch('/api/check', {
+      signal: AbortSignal.timeout(40000),
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(input),
@@ -28,6 +29,7 @@ export type SimReply = { done: false; reply: string } | SimEnd
 export async function simStep(scheme: string, messages: SimMsg[], finish = false): Promise<SimReply | null> {
   try {
     const r = await fetch('/api/sim', {
+      signal: AbortSignal.timeout(25000),
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ scheme, messages, finish }),

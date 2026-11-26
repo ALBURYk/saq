@@ -44,15 +44,22 @@ async function gemini(key: string, system: string, contents: unknown[], temperat
   const models = [process.env.GEMINI_MODEL, 'gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'].filter(Boolean) as string[]
   let last = 'no model'
   for (const m of models) {
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`, {
+    let r: Response
+    try {
+      r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`, {
+      signal: AbortSignal.timeout(12000),
       method: 'POST',
       headers: { 'x-goog-api-key': key, 'content-type': 'application/json' },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: system }] },
         contents,
-        generationConfig: { responseMimeType: 'application/json', responseSchema: SIM_SCHEMA, temperature, maxOutputTokens: 4096 },
+        generationConfig: { responseMimeType: 'application/json', responseSchema: SIM_SCHEMA, temperature, maxOutputTokens: 4096, ...(m.includes('2.5') ? { thinkingConfig: { thinkingBudget: 0 } } : {}) },
       }),
     })
+    } catch {
+      last += ` | ${m} timeout`
+      continue
+    }
     if (r.status === 404 || r.status === 429 || r.status >= 500) {
       last += ` | ${m} ${r.status}`
       continue
