@@ -61,7 +61,7 @@ export default function Checker({ onRisk }: { onRisk: (r: number | null) => void
   }
 
   return (
-    <div className="grid gap-6">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
       <Glass refract className="p-5 sm:p-7">
         <div className="mb-3 flex items-center justify-between gap-3">
           <h2 className="font-display text-xl font-semibold sm:text-2xl">Что вам написали или сказали?</h2>
@@ -146,11 +146,11 @@ export default function Checker({ onRisk }: { onRisk: (r: number | null) => void
       {hist.length > 0 && (
         <div>
           <div className="mb-2 text-xs font-medium uppercase tracking-wider text-white/40">Последние проверки (только на этом устройстве)</div>
-          <div className="grid gap-2">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-2">
             {hist.map((h) => (
               <div key={h.at} className="flex items-center gap-3 rounded-xl bg-white/4 px-4 py-2 text-sm">
                 <span className="font-bold" style={{ color: riskTone(h.risk).color }}>{h.risk}%</span>
-                <span className="truncate text-white/60">{h.scheme} — {h.snippet}</span>
+                <span className="min-w-0 truncate text-white/60">{h.scheme} — {h.snippet}</span>
               </div>
             ))}
           </div>

@@ -33,14 +33,14 @@ export default function App() {
           </p>
           <p className="mt-2 text-sm text-white/40">«Сақ» по-казахски — бдительный.</p>
         </motion.div>
-        <div className="pointer-events-none relative -my-6 h-[280px] sm:h-[380px] md:my-0 md:h-[440px]">
+        <div className="pointer-events-none absolute -right-20 top-0 h-[300px] w-[300px] opacity-70 md:relative md:right-auto md:h-[440px] md:w-auto md:opacity-100">
           <Suspense fallback={null}>
             <Orb risk={tab === 'check' ? risk : null} />
           </Suspense>
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto max-w-4xl px-4 pb-16 sm:px-6">
+      <main className="relative z-10 mx-auto mt-8 max-w-4xl px-4 pb-16 sm:px-6 md:mt-0">
         <Glass className="mx-auto mb-6 flex w-full max-w-md gap-1 p-1.5">
           {(
             [

@@ -84,7 +84,7 @@ export default function Sim() {
 
   if (!scheme) {
     return (
-      <div className="grid gap-5">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5">
         <Glass refract className="p-5 sm:p-7">
           <h2 className="font-display text-xl font-semibold sm:text-2xl">Прививка от мошенников</h2>
           <p className="mt-2 max-w-2xl text-white/70">
