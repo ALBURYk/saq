@@ -1,32 +1,72 @@
-# React + TypeScript + Vite
+# Saq — проверь, прежде чем перевести
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+**Saq** (каз. «сақ» — бдительный) — ИИ-щит от мошенников **до** перевода денег.
+Банковский антифрод ловит транзакцию. Saq ловит момент, когда человека ещё уговаривают.
 
-Currently, two official plugins are available:
+**Демо:** https://saq-alburyks-projects.vercel.app · Venture Startup Battle 2026 · финтех + соцзащита
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Что умеет
+1. **Проверка** — вставьте текст, скриншот переписки или опишите звонок → за секунды:
+   риск 0–100, название схемы, **подсвеченные фразы-манипуляции с объяснением**, 3 шага «что делать сейчас».
+   Кнопки **«Прочитать вслух»** (для пожилых) и **«Отправить внуку»** (WhatsApp).
+2. **Прививка** — ИИ безопасно играет мошенника в чате по реальной схеме (звонок «банка», покупатель с OLX, «мама, я в беде»).
+   Пользователь должен распознать обман и нажать «Это мошенник!». В конце — разбор: замеченные и пропущенные красные флаги, балл.
+3. 3D-сфера риска меняет цвет и «тревожность» в зависимости от последнего вердикта.
 
-## React Compiler
+## Запуск
+```bash
+npm i && npm run dev
+```
+Без ключа всё работает в офлайн-режиме (правила по ключевым словам + офлайн-сценарии тренажёра).
+Для ИИ-режима задайте `ANTHROPIC_API_KEY` в переменных окружения Vercel (функции `api/*` запускаются на Vercel или через `vercel dev`).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `tsrs` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+## Архитектура
+```
+Браузер (React + TS)                       Vercel Functions                  Anthropic API
+ ├ Checker: текст / скрин ──сжатие canvas──► api/check.ts ──валидация──────► claude-haiku-5-5 (текст + vision)
+ │   (1280px JPEG, EXIF удаляется)          │  лимиты, JSON-схема ответа ◄── строгий JSON-вердикт
+ │                                          └  фолбэк: правила (fallback:true)
+ ├ Verdict: риск, подсветка фраз, действия, speechSynthesis (ru-RU), wa.me
+ ├ Sim: чат «Прививка» ───────────────────► api/sim.ts ───────────────────► claude-haiku-5-5 (роль «мошенника»)
+ │                                          └  ≤6 реплик → JSON-разбор       без реальных номеров/ссылок
+ └ Orb (three.js / r3f), localStorage — история последних 5 проверок (только на устройстве)
+```
+```
+src/App.tsx                 hero + вкладки Проверка | Прививка
+src/components/Glass.tsx    liquid glass (blur + saturate + блик, SVG-преломление в Chromium)
+src/components/Orb.tsx      3D-сфера риска (MeshDistortMaterial)
+src/components/Checker.tsx  ввод текста/скрина, примеры, история
+src/components/Verdict.tsx  вердикт, подсветка манипуляций, озвучка, WhatsApp
+src/components/Sim.tsx      тренажёр «Прививка» + разбор
+src/data/examples.ts        учебные примеры сообщений и офлайн-сценарии тренажёра
+src/lib/api.ts, rules.ts    клиент API, сжатие изображений, правила-фолбэк
+api/check.ts, api/sim.ts    серверные функции
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Безопасность и приватность
+- Ключ ИИ только на сервере (env `ANTHROPIC_API_KEY`), в браузер не попадает.
+- Сервер проверяет вход: текст ≤ 4000 символов, картинка только `image/jpeg|png|webp` ≤ 4 МБ.
+- Ответ ИИ парсится и валидируется (поля, типы, диапазоны); при ошибке — фолбэк на правила, демо не ломается.
+- Скриншоты пережимаются в браузере через canvas → метаданные (EXIF, геолокация) удаляются до отправки.
+- Ничего не храним на сервере, БД нет. История — только в localStorage пользователя.
+- Тренажёр: системный промпт запрещает реальные номера, ссылки, реквизиты и названия банков; не больше 6 реплик.
+
+## Что сделали мы / что сторонее
+**Сами:** продукт и UX, промпты и JSON-контракты, логика вердикта и подсветки фраз, правила-фолбэк, тренажёр «Прививка» и его офлайн-сценарии, интерфейс (liquid glass, анимации), серверные функции и валидация.
+
+**Сторонние сервисы и библиотеки:**
+| Что | Зачем |
+|---|---|
+| Anthropic API (Claude Haiku) | анализ текста и скриншотов, роль «мошенника» в тренажёре |
+| Vercel | хостинг и serverless-функции |
+| React, Vite, TypeScript | фронтенд |
+| Tailwind CSS v4, motion | стили и анимации |
+| three.js, @react-three/fiber, @react-three/drei | 3D-сфера риска |
+| Web Speech API (браузер) | озвучка вердикта |
+| WhatsApp `wa.me` ссылки | «Отправить внуку» |
+| Google Fonts (Inter, Unbounded) | шрифты |
+| Claude Code | ИИ-ассистент при разработке |
+
+## Данные
+Примеры сообщений в приложении — **учебные**, составлены по описаниям типичных схем.
+Статистика в футере: 28 851 случай интернет-мошенничества в РК за 2025 г., ущерб 12,2 млрд ₸ (Генпрокуратура РК, nur.kz, bes.media).
