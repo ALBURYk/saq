@@ -16,7 +16,7 @@ type Msg = { role: 'assistant' | 'user'; content: string }
 
 // Google Gemini (generateContent). Модель из env GEMINI_MODEL, иначе пробуем по списку (404 → следующая).
 async function gemini(key: string, system: string, contents: unknown[], temperature: number): Promise<string> {
-  const models = [process.env.GEMINI_MODEL, 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'].filter(Boolean) as string[]
+  const models = [process.env.GEMINI_MODEL, 'gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'].filter(Boolean) as string[]
   let last = 'no model'
   for (const m of models) {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`, {
@@ -28,8 +28,8 @@ async function gemini(key: string, system: string, contents: unknown[], temperat
         generationConfig: { responseMimeType: 'application/json', temperature, maxOutputTokens: 4096 },
       }),
     })
-    if (r.status === 404) {
-      last = `gemini ${m} 404`
+    if (r.status === 404 || r.status === 429 || r.status >= 500) {
+      last += ` | ${m} ${r.status}`
       continue
     }
     if (!r.ok) throw new Error(`gemini ${m} ${r.status}`)
