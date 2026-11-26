@@ -39,7 +39,9 @@ export default function Sim() {
   const [offline, setOffline] = useState(false)
   const bottom = useRef<HTMLDivElement>(null)
 
-  useEffect(() => bottom.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), [msgs, loading, end])
+  useEffect(() => {
+    bottom.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+  }, [msgs, loading, end])
 
   const start = async (s: SimScheme) => {
     setScheme(s)
@@ -64,8 +66,7 @@ export default function Sim() {
     setInput('')
     setLoading(true)
     const r = offline ? null : await simStep(scheme.id, next, finish)
-    if (!offline) await new Promise((res) => setTimeout(res, 0))
-    else await new Promise((res) => setTimeout(res, 700))
+    if (offline) await new Promise((res) => setTimeout(res, 700))
     setLoading(false)
     if (r) {
       if (r.done) setEnd(r)
