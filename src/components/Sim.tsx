@@ -69,7 +69,11 @@ export default function Sim() {
     if (offline) await new Promise((res) => setTimeout(res, 700))
     setLoading(false)
     if (r) {
-      if (r.done) setEnd(r)
+      if (r.done) {
+        // ИИ иногда возвращает пустые списки — подставляем приёмы, которые человек уже увидел в диалоге
+        const seen = SIM_SCRIPTS[scheme.id].slice(0, Math.max(2, next.filter((m) => m.role === 'assistant').length)).map((x) => x.flag)
+        setEnd(r.caught.length || r.missed.length ? r : { ...r, caught: r.score >= 50 ? seen : [], missed: r.score >= 50 ? [] : seen })
+      }
       else setMsgs([...next, { role: 'assistant', content: r.reply }])
       return
     }
